@@ -1,26 +1,3 @@
-"""
-Script 3: model.py
-Simple CNN + Simple RNN architecture for video action classification.
-
-Architecture:
-    ┌─────────────────────────────────────────────────────────────┐
-    │  Input: (B, T, C, H, W)  – batch of video frame sequences  │
-    └──────────────────────┬──────────────────────────────────────┘
-                           │  Reshape → (B*T, C, H, W)
-                    ┌──────▼──────┐
-                    │  Simple CNN │  3 Conv blocks → flatten → FC
-                    │  → (B*T, F) │  F = 256 feature vector per frame
-                    └──────┬──────┘
-                           │  Reshape → (B, T, F)
-                    ┌──────▼──────┐
-                    │  Simple RNN │  vanilla nn.RNN (tanh), single direction
-                    │  → (B, H)   │  last hidden state h_T
-                    └──────┬──────┘
-                    ┌──────▼──────┐
-                    │  Classifier │  Linear → num_classes
-                    └─────────────┘
-"""
-
 import torch
 import torch.nn as nn
 
@@ -30,7 +7,7 @@ NUM_CLASSES = 6  # walking, jogging, running, boxing, handwaving, handclapping
 
 # ─────────────────────────── Simple CNN Encoder ───────────────────────────────
 
-class SimpleCNN(nn.Module):
+class CNN(nn.Module):
     """
     A straightforward 3-block convolutional encoder.
 
@@ -95,7 +72,7 @@ class SimpleCNN(nn.Module):
 
 # ─────────────────────────── Simple Vanilla RNN ───────────────────────────────
 
-class SimpleRNN(nn.Module):
+class RNN(nn.Module):
     """
     A plain vanilla RNN using PyTorch's nn.RNN (tanh activation).
     No LSTM gates, no GRU gates — just the basic recurrence:
@@ -157,10 +134,10 @@ class CNNRNN(nn.Module):
         super().__init__()
 
         # ── Simple CNN ────────────────────────────────────────────────────────
-        self.cnn = SimpleCNN(feature_dim=feature_dim)
+        self.cnn = CNN(feature_dim=feature_dim)
 
         # ── Simple Vanilla RNN ────────────────────────────────────────────────
-        self.rnn = SimpleRNN(
+        self.rnn = RNN(
             input_dim=feature_dim,
             hidden_dim=hidden_dim,
             num_layers=num_rnn_layers,
